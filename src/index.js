@@ -243,6 +243,7 @@ async function executeSELECTQuery(query) {
     groupByFields,
     hasAggregateWithoutGroupBy,
     orderByFields,
+    limit,
   } = parseQuery(query);
   let data = await readCSV(`${table}.csv`);
 
@@ -275,8 +276,6 @@ async function executeSELECTQuery(query) {
   if (hasAggregateWithoutGroupBy) {
     // Special handling for queries like 'SELECT COUNT(*) FROM table'
     const result = {};
-
-    // console.log({ filteredData })
 
     fields.forEach((field) => {
       const match = /(\w+)\((\*|\w+)\)/.exec(field);
@@ -330,6 +329,9 @@ async function executeSELECTQuery(query) {
         return 0;
       });
     }
+    if (limit !== null) {
+      groupResults = groupResults.slice(0, limit);
+    }
     return groupResults;
   } else {
     // Order them by the specified fields
@@ -342,6 +344,10 @@ async function executeSELECTQuery(query) {
         }
         return 0;
       });
+    }
+
+    if (limit !== null) {
+      orderedResults = orderedResults.slice(0, limit);
     }
 
     // Select the specified fields
