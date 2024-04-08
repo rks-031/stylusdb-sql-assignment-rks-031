@@ -12,6 +12,7 @@ test("Parse SQL Query", () => {
     joinType: null,
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -33,6 +34,7 @@ test("Parse SQL Query with WHERE Clause", () => {
     joinType: null,
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -59,6 +61,7 @@ test("Parse SQL Query with Multiple WHERE Clauses", () => {
     joinType: null,
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -75,6 +78,7 @@ test("Parse SQL Query with INNER JOIN", async () => {
     joinCondition: { left: "student.id", right: "enrollment.student_id" },
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -91,6 +95,7 @@ test("Parse SQL Query with INNER JOIN and WHERE Clause", async () => {
     joinCondition: { left: "student.id", right: "enrollment.student_id" },
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -150,6 +155,7 @@ test("Parse LEFT Join Query Completely", () => {
     joinCondition: { left: "student.id", right: "enrollment.student_id" },
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -166,6 +172,7 @@ test("Parse LEFT Join Query Completely", () => {
     joinCondition: { left: "student.id", right: "enrollment.student_id" },
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -182,6 +189,7 @@ test("Parse SQL Query with LEFT JOIN with a WHERE clause filtering the main tabl
     whereClauses: [{ field: "student.age", operator: ">", value: "22" }],
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -199,6 +207,7 @@ test("Parse SQL Query with LEFT JOIN with a WHERE clause filtering the join tabl
     ],
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -215,6 +224,7 @@ test("Parse SQL Query with RIGHT JOIN with a WHERE clause filtering the main tab
     whereClauses: [{ field: "student.age", operator: "<", value: "25" }],
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -232,6 +242,7 @@ test("Parse SQL Query with RIGHT JOIN with a WHERE clause filtering the join tab
     ],
     groupByFields: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -247,6 +258,7 @@ test("Parse COUNT Aggregate Query", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    orderByFields: null,
   });
 });
 
@@ -262,6 +274,7 @@ test("Parse SUM Aggregate Query", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    orderByFields: null,
   });
 });
 
@@ -277,6 +290,7 @@ test("Parse AVG Aggregate Query", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    orderByFields: null,
   });
 });
 
@@ -292,6 +306,7 @@ test("Parse MIN Aggregate Query", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    orderByFields: null,
   });
 });
 
@@ -307,6 +322,7 @@ test("Parse MAX Aggregate Query", () => {
     joinCondition: null,
     joinTable: null,
     joinType: null,
+    orderByFields: null,
   });
 });
 
@@ -322,6 +338,7 @@ test("Parse basic GROUP BY query", () => {
     joinTable: null,
     joinCondition: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -337,6 +354,7 @@ test("Parse GROUP BY query with WHERE clause", () => {
     joinTable: null,
     joinCondition: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -353,6 +371,7 @@ test("Parse GROUP BY query with multiple fields", () => {
     joinTable: null,
     joinCondition: null,
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
 });
 
@@ -374,5 +393,27 @@ test("Parse GROUP BY query with JOIN and WHERE clauses", () => {
       right: "enrollment.student_id",
     },
     hasAggregateWithoutGroupBy: false,
+    orderByFields: null,
   });
+});
+
+test("Parse SQL Query with ORDER BY", () => {
+  const query = "SELECT name FROM student ORDER BY name ASC";
+  const parsed = parseQuery(query);
+  expect(parsed.orderByFields).toEqual([{ fieldName: "name", order: "ASC" }]);
+});
+
+test("Parse SQL Query with ORDER BY and WHERE", () => {
+  const query = "SELECT name FROM student WHERE age > 20 ORDER BY name DESC";
+  const parsed = parseQuery(query);
+  expect(parsed.orderByFields).toEqual([{ fieldName: "name", order: "DESC" }]);
+  expect(parsed.whereClauses.length).toBeGreaterThan(0);
+});
+
+test("Parse SQL Query with ORDER BY and GROUP BY", () => {
+  const query =
+    "SELECT COUNT(id), age FROM student GROUP BY age ORDER BY age DESC";
+  const parsed = parseQuery(query);
+  expect(parsed.orderByFields).toEqual([{ fieldName: "age", order: "DESC" }]);
+  expect(parsed.groupByFields).toEqual(["age"]);
 });
